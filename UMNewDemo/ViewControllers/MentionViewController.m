@@ -16,24 +16,73 @@
 @property (nonatomic) UIAttachmentBehavior *attachmentBehavior;
 @end
 
-@implementation MentionViewController
+@implementation MentionViewController {
+    BOOL _interactionEnabled;
+}
 
 + (UIColor *)randomColor {
     return [UIColor colorWithRed:(float)rand() / RAND_MAX green:(float)rand() / RAND_MAX blue:(float)rand() / RAND_MAX alpha:1];
 }
 
 - (void)viewDidLoad {
+    _interactionEnabled = YES;
     self.view.backgroundColor = [MentionViewController randomColor];
     self.imageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"earthporn"]];
     [self.view addSubview:self.imageView];
     self.imageView.userInteractionEnabled = YES;
-    self.imageView.bounds = CGRectMake(10, 10, 320/2, 568/2);
+    self.imageView.frame = [self defaultRectForMainView];
     
     self.animator = [[UIDynamicAnimator alloc] initWithReferenceView:self.view];
     
     self.recognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handleGesture:)];
     self.recognizer.delegate = self;
     [self.imageView addGestureRecognizer:self.recognizer];
+}
+
+- (BOOL)actionIsCompletedWithView:(UIView *)view velocity:(CGPoint)velocity {
+    // assume as if the user retains the same velocity for another .1 second
+    CGPoint finalPoint = CGPointMake(view.center.x + velocity.x * 0.1, view.center.y + velocity.y * 0.5);
+    double progress = [self transitionIntervalForPoint:finalPoint inView:self.view];
+    NSLog(@"Transition progress: %.2f", progress);
+    return progress > 0.5;
+}
+
+- (double)transitionIntervalForPoint:(CGPoint)point inView:(UIView *)view {
+    CGSize size = view.bounds.size;
+    CGPoint center = view.center;
+    double ix = fabs((point.x - center.x) * 2.0 / size.width);
+    double iy = fabs((point.y - center.y) * 2.0 / size.height);
+    return MAX(ix, iy);
+}
+
+- (void)startTransition {
+    
+}
+
+- (CGRect)defaultRectForMainView {
+    return CGRectMake(320/4, 568/4, 320/2, 568/2);
+}
+
+- (void)finishTransition:(BOOL)completed {
+    if (completed) {
+        
+    } else {
+        __block UISnapBehavior *behavior = [[UISnapBehavior alloc] initWithItem:self.imageView snapToPoint:self.view.center];
+        [self.animator addBehavior:behavior];
+        _interactionEnabled = NO;
+        // unfortunately apple did not supply a completion callback for UISnapBehavior. we will just assume it finishes
+        // after 1 second.
+        double delayInSeconds = 1.0;
+        dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(delayInSeconds * NSEC_PER_SEC));
+        dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
+            [self.animator removeBehavior:behavior];
+            _interactionEnabled = YES;
+        });
+    }
+}
+
+- (void)updateTransitionWithInterval:(double)interval {
+    
 }
 
 - (void)handleGesture:(UIPanGestureRecognizer *)recognizer {
@@ -60,6 +109,10 @@
         case UIGestureRecognizerStateEnded:
             [self.animator removeBehavior:self.attachmentBehavior];
             self.attachmentBehavior = nil;
+            CGPoint velocity = [recognizer velocityInView:self.view];
+            BOOL completed = [self actionIsCompletedWithView:self.imageView velocity:velocity];
+            [self finishTransition:completed];
+            break;
         default:
             break;
     }
