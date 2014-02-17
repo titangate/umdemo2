@@ -22,6 +22,8 @@
 		BB9B76FF18B18A6700388C2F /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BB9B76DE18B18A6700388C2F /* UIKit.framework */; };
 		BB9B770718B18A6700388C2F /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = BB9B770518B18A6700388C2F /* InfoPlist.strings */; };
 		BB9B770918B18A6700388C2F /* UMNewDemoTests.m in Sources */ = {isa = PBXBuildFile; fileRef = BB9B770818B18A6700388C2F /* UMNewDemoTests.m */; };
+		BB9B771418B19EE600388C2F /* MentionViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BB9B771318B19EE600388C2F /* MentionViewController.m */; };
+		BB9B771918B1A4A200388C2F /* MentionTransitionAnimator.m in Sources */ = {isa = PBXBuildFile; fileRef = BB9B771818B1A4A200388C2F /* MentionTransitionAnimator.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -55,6 +57,10 @@
 		BB9B770418B18A6700388C2F /* UMNewDemoTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "UMNewDemoTests-Info.plist"; sourceTree = "<group>"; };
 		BB9B770618B18A6700388C2F /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		BB9B770818B18A6700388C2F /* UMNewDemoTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UMNewDemoTests.m; sourceTree = "<group>"; };
+		BB9B771218B19EE600388C2F /* MentionViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MentionViewController.h; sourceTree = "<group>"; };
+		BB9B771318B19EE600388C2F /* MentionViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MentionViewController.m; sourceTree = "<group>"; };
+		BB9B771718B1A4A200388C2F /* MentionTransitionAnimator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MentionTransitionAnimator.h; sourceTree = "<group>"; };
+		BB9B771818B1A4A200388C2F /* MentionTransitionAnimator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MentionTransitionAnimator.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -114,6 +120,8 @@
 		BB9B76E018B18A6700388C2F /* UMNewDemo */ = {
 			isa = PBXGroup;
 			children = (
+				BB9B771618B1A44800388C2F /* Animators */,
+				BB9B771518B19EED00388C2F /* ViewControllers */,
 				BB9B76E918B18A6700388C2F /* AppDelegate.h */,
 				BB9B76EA18B18A6700388C2F /* AppDelegate.m */,
 				BB9B76EC18B18A6700388C2F /* Main_iPhone.storyboard */,
@@ -153,6 +161,24 @@
 				BB9B770518B18A6700388C2F /* InfoPlist.strings */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		BB9B771518B19EED00388C2F /* ViewControllers */ = {
+			isa = PBXGroup;
+			children = (
+				BB9B771218B19EE600388C2F /* MentionViewController.h */,
+				BB9B771318B19EE600388C2F /* MentionViewController.m */,
+			);
+			path = ViewControllers;
+			sourceTree = "<group>";
+		};
+		BB9B771618B1A44800388C2F /* Animators */ = {
+			isa = PBXGroup;
+			children = (
+				BB9B771718B1A4A200388C2F /* MentionTransitionAnimator.h */,
+				BB9B771818B1A4A200388C2F /* MentionTransitionAnimator.m */,
+			);
+			path = Animators;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -254,8 +280,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				BB9B76F418B18A6700388C2F /* ViewController.m in Sources */,
+				BB9B771918B1A4A200388C2F /* MentionTransitionAnimator.m in Sources */,
 				BB9B76EB18B18A6700388C2F /* AppDelegate.m in Sources */,
 				BB9B76E718B18A6700388C2F /* main.m in Sources */,
+				BB9B771418B19EE600388C2F /* MentionViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

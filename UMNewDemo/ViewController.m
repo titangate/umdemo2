@@ -7,23 +7,27 @@
 //
 
 #import "ViewController.h"
+#import "MentionViewController.h"
 
 @interface ViewController ()
-
+@property (nonatomic) NSMutableArray *viewControllers;
 @end
 
 @implementation ViewController
 
-- (void)viewDidLoad
-{
-    [super viewDidLoad];
-	// Do any additional setup after loading the view, typically from a nib.
-}
-
-- (void)didReceiveMemoryWarning
-{
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
+- (void)viewDidLoad {
+    self.viewControllers = [[NSMutableArray alloc] init];
+    double delayInSeconds = 2;
+    for (int i = 1; i < 4; i++) {
+        dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(i * delayInSeconds * NSEC_PER_SEC));
+        dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
+            MentionViewController *controller = [[MentionViewController alloc] init];
+            self.navigationController.delegate = controller;
+            [self.navigationController pushViewController:controller animated:YES];
+            
+            [self.viewControllers addObject:controller];
+        });
+    }
 }
 
 @end
