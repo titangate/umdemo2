@@ -19,106 +19,29 @@
 
 #pragma mark - UIViewControllerAnimatedTransitioning
 
-- (void)animateTransition:(id<UIViewControllerContextTransitioning>)transitionContext
+
+// This method can only be a nop if the transition is interactive and not a percentDriven interactive transition.
+- (void)animateTransition:(id <UIViewControllerContextTransitioning>)transitionContext
 {
-    UIViewController *fromVC = [transitionContext viewControllerForKey:UITransitionContextFromViewControllerKey];
-    UIViewController *toVC = [transitionContext viewControllerForKey:UITransitionContextToViewControllerKey];
-    UIView *fromView = fromVC.view;
-    UIView *toView = toVC.view;
     UIView *containerView = [transitionContext containerView];
-    CGFloat duration = [self transitionDuration:transitionContext];
+    UIView *fromView = [transitionContext viewControllerForKey:UITransitionContextFromViewControllerKey].view;
+    UIView *toView = [transitionContext viewControllerForKey:UITransitionContextToViewControllerKey].view;
     
-    CGRect initialFrame = [transitionContext initialFrameForViewController:fromVC];
-    CGRect offscreenRect = [self rectOffsetFromRect:initialFrame atEdge:self.edge];
+    toView.transform = CGAffineTransformMakeScale(0.8, 0.8);
+    [containerView insertSubview:toView belowSubview:fromView];
+    toView.alpha = 0.5;
     
-    // Presenting
-    if (self.appearing) {
-        // Position the view offscreen
-        toView.frame = offscreenRect;
-        [containerView addSubview:toView];
-        
-        // Animate the view onscreen
-        [UIView animateWithDuration:duration animations: ^{
-            toView.frame = initialFrame;
-        } completion: ^(BOOL finished) {
-            [transitionContext completeTransition:![transitionContext transitionWasCancelled]];
-        }];
-    }
-    // Dismissing
-    else {
-        [containerView addSubview:toView];
-        [containerView sendSubviewToBack:toView];
-        
-        // Animate the view offscreen
-        [UIView animateWithDuration:duration animations: ^{
-            fromView.frame = offscreenRect;
-        } completion: ^(BOOL finished) {
-            [fromView removeFromSuperview];
-            [transitionContext completeTransition:![transitionContext transitionWasCancelled]];
-        }];
-    }
-}
-
-#pragma mark - Helper methods
-
-+ (NSDictionary *)edgeDisplayNames
-{
-    return @{@(SOLEdgeTop) : @"Top",
-             @(SOLEdgeLeft) : @"Left",
-             @(SOLEdgeBottom) : @"Bottom",
-             @(SOLEdgeRight) : @"Right",
-             @(SOLEdgeTopRight) : @"Top-Right",
-             @(SOLEdgeTopLeft) : @"Top-Left",
-             @(SOLEdgeBottomRight) : @"Bottom-Right",
-             @(SOLEdgeBottomLeft) : @"Bottom-Left"};
-}
-
-- (CGRect)rectOffsetFromRect:(CGRect)rect atEdge:(SOLEdge)edge
-{
-    CGRect offsetRect = rect;
-    
-    switch (edge) {
-        case SOLEdgeTop: {
-            offsetRect.origin.y -= CGRectGetHeight(rect);
-            break;
-        }
-        case SOLEdgeLeft: {
-            offsetRect.origin.x -= CGRectGetWidth(rect);
-            break;
-        }
-        case SOLEdgeBottom: {
-            offsetRect.origin.y += CGRectGetHeight(rect);
-            break;
-        }
-        case SOLEdgeRight: {
-            offsetRect.origin.x += CGRectGetWidth(rect);
-            break;
-        }
-        case SOLEdgeTopRight: {
-            offsetRect.origin.y -= CGRectGetHeight(rect);
-            offsetRect.origin.x += CGRectGetWidth(rect);
-            break;
-        }
-        case SOLEdgeTopLeft: {
-            offsetRect.origin.y -= CGRectGetHeight(rect);
-            offsetRect.origin.x -= CGRectGetWidth(rect);
-            break;
-        }
-        case SOLEdgeBottomRight: {
-            offsetRect.origin.y += CGRectGetHeight(rect);
-            offsetRect.origin.x += CGRectGetWidth(rect);
-            break;
-        }
-        case SOLEdgeBottomLeft: {
-            offsetRect.origin.y += CGRectGetHeight(rect);
-            offsetRect.origin.x -= CGRectGetWidth(rect);
-            break;
-        }
-        default:
-            break;
-    }
-    
-    return offsetRect;
+    [UIView animateWithDuration:[self transitionDuration:transitionContext]
+                          delay:0.0
+                        options:UIViewAnimationOptionCurveLinear
+                     animations:^{
+                         toView.transform = CGAffineTransformIdentity;
+                         toView.alpha = 1;
+                     }
+                     completion:^(BOOL finished) {
+                         BOOL completed = toView.alpha == 1;
+                         [transitionContext completeTransition:completed];
+                     }];
 }
 
 @end

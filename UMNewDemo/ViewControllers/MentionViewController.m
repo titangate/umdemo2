@@ -11,23 +11,37 @@
 
 @interface MentionViewController () <UIViewControllerTransitioningDelegate, UIGestureRecognizerDelegate>
 @property (nonatomic) UIImageView *imageView;
+@property (nonatomic) UILabel *textView;
 @property (nonatomic) UIDynamicAnimator *animator;
 @property (nonatomic) UIPanGestureRecognizer *recognizer;
 @property (nonatomic) UIAttachmentBehavior *attachmentBehavior;
+@property (nonatomic) MentionTransitionAnimator *transitionAnimator;
 @end
 
 @implementation MentionViewController {
     BOOL _interactionEnabled;
+    NSString *_text;
+    UIImage *_image;
 }
 
 + (UIColor *)randomColor {
     return [UIColor colorWithRed:(float)rand() / RAND_MAX green:(float)rand() / RAND_MAX blue:(float)rand() / RAND_MAX alpha:1];
 }
 
+- (void)setText:(NSString *)text {
+    _text = text;
+    self.textView.text = text;
+}
+
+- (void)setImage:(UIImage *)image {
+    _image = image;
+    self.imageView.image = image;
+}
+
 - (void)viewDidLoad {
     _interactionEnabled = YES;
-    self.view.backgroundColor = [MentionViewController randomColor];
-    self.imageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"earthporn"]];
+    self.view.backgroundColor = [UIColor clearColor];
+    self.imageView = [[UIImageView alloc] initWithImage:_image];
     [self.view addSubview:self.imageView];
     self.imageView.userInteractionEnabled = YES;
     self.imageView.frame = [self defaultRectForMainView];
@@ -36,14 +50,22 @@
     
     self.recognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handleGesture:)];
     self.recognizer.delegate = self;
+    
+    self.textView = [[UILabel alloc] initWithFrame:self.imageView.bounds];
+    self.textView.numberOfLines = 0;
+    self.textView.userInteractionEnabled = NO;
+    self.textView.textColor = [UIColor whiteColor];
+    self.textView.text = _text;
+    self.textView.backgroundColor = [UIColor clearColor];
     [self.imageView addGestureRecognizer:self.recognizer];
+    
+    [self.imageView addSubview:self.textView];
 }
 
 - (BOOL)actionIsCompletedWithView:(UIView *)view velocity:(CGPoint)velocity {
     // assume as if the user retains the same velocity for another .1 second
-    CGPoint finalPoint = CGPointMake(view.center.x + velocity.x * 0.1, view.center.y + velocity.y * 0.5);
+    CGPoint finalPoint = CGPointMake(view.center.x + velocity.x * 0.1, view.center.y + velocity.y * 0.1);
     double progress = [self transitionIntervalForPoint:finalPoint inView:self.view];
-    NSLog(@"Transition progress: %.2f", progress);
     return progress > 0.5;
 }
 
@@ -56,7 +78,7 @@
 }
 
 - (void)startTransition {
-    
+    [self.navigationController popViewControllerAnimated:YES];
 }
 
 - (CGRect)defaultRectForMainView {
@@ -65,9 +87,12 @@
 
 - (void)finishTransition:(BOOL)completed {
     if (completed) {
-        
+        [self.transitionAnimator finishInteractiveTransition];
     } else {
-        __block UISnapBehavior *behavior = [[UISnapBehavior alloc] initWithItem:self.imageView snapToPoint:self.view.center];
+        [self.transitionAnimator cancelInteractiveTransition];
+        CGRect rect = [self defaultRectForMainView];
+        CGPoint targetPoint = CGPointMake(CGRectGetMidX(rect), CGRectGetMidY(rect));
+        __block UISnapBehavior *behavior = [[UISnapBehavior alloc] initWithItem:self.imageView snapToPoint:targetPoint];
         [self.animator addBehavior:behavior];
         _interactionEnabled = NO;
         // unfortunately apple did not supply a completion callback for UISnapBehavior. we will just assume it finishes
@@ -82,13 +107,14 @@
 }
 
 - (void)updateTransitionWithInterval:(double)interval {
-    
+    [self.transitionAnimator updateInteractiveTransition:interval];
 }
 
 - (void)handleGesture:(UIPanGestureRecognizer *)recognizer {
     CGPoint location = [recognizer locationInView:self.view];
     switch (recognizer.state) {
         case UIGestureRecognizerStateBegan:
+            [self startTransition];
             if (self.attachmentBehavior == nil) {
                 // the view might be rotated. we apply a rotational matrix to calculate the correct offset.
                 // the angle is the opposite to the rotation of the view.
@@ -105,6 +131,8 @@
             }
         case UIGestureRecognizerStateChanged:
             [self.attachmentBehavior setAnchorPoint:location];
+            double progress = [self transitionIntervalForPoint:self.imageView.center inView:self.view];
+            [self updateTransitionWithInterval:progress];
             break;
         case UIGestureRecognizerStateEnded:
             [self.animator removeBehavior:self.attachmentBehavior];
@@ -118,17 +146,26 @@
     }
 }
 
-+ (SOLEdge)randomEdge {
-    return rand() % 8;
+- (id<UIViewControllerAnimatedTransitioning>)navigationController:(UINavigationController *)navigationController animationControllerForOperation:(UINavigationControllerOperation)operation fromViewController:(UIViewController *)fromVC toViewController:(UIViewController *)toVC {
+    if (operation == UINavigationControllerOperationPop) {
+        toVC.transitioningDelegate = self;
+        
+        // use a random transition
+        MentionTransitionAnimator *animator = [[MentionTransitionAnimator alloc] init];
+        self.transitionAnimator = animator;
+        return animator;
+    }
+    return nil;
 }
 
-- (id<UIViewControllerAnimatedTransitioning>)navigationController:(UINavigationController *)navigationController animationControllerForOperation:(UINavigationControllerOperation)operation fromViewController:(UIViewController *)fromVC toViewController:(UIViewController *)toVC {
-    toVC.transitioningDelegate = self;
-    
-    // use a random transition
-    MentionTransitionAnimator *animator = [[MentionTransitionAnimator alloc] init];
-    animator.edge = [MentionViewController randomEdge];
-    return animator;
+- (id <UIViewControllerInteractiveTransitioning>)navigationController:(UINavigationController *)navigationController
+                          interactionControllerForAnimationController:(id <UIViewControllerAnimatedTransitioning>) animationController
+{
+    if (animationController == self.transitionAnimator) {
+        
+        return self.transitionAnimator;
+    }
+    return nil;
 }
 
 #pragma mark UIGestureRecognizerDelegate methods

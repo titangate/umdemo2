@@ -9,25 +9,27 @@
 #import "ViewController.h"
 #import "MentionViewController.h"
 
-@interface ViewController ()
+@interface ViewController () <MentionViewControllerDelegate>
 @property (nonatomic) NSMutableArray *viewControllers;
 @end
 
 @implementation ViewController
 
+- (MentionViewController *)createNewMentionViewControllerAtIndex:(NSInteger)index {
+    MentionViewController *controller = [[MentionViewController alloc] init];
+    [controller setImage:[UIImage imageNamed:@"earthporn"]];
+    [controller setText:[NSString stringWithFormat:@"This is the %dth mention", index]];
+    return controller;
+}
+
 - (void)viewDidLoad {
     self.viewControllers = [[NSMutableArray alloc] init];
-    double delayInSeconds = 2;
-    for (int i = 1; i < 4; i++) {
-        dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(i * delayInSeconds * NSEC_PER_SEC));
-        dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
-            MentionViewController *controller = [[MentionViewController alloc] init];
-            self.navigationController.delegate = controller;
-            [self.navigationController pushViewController:controller animated:YES];
-            
-            [self.viewControllers addObject:controller];
-        });
-    }
+    MentionViewController *controller = [self createNewMentionViewControllerAtIndex:0];
+    self.navigationController.delegate = controller;
+    [self.navigationController pushViewController:controller animated:YES];
+    [self.viewControllers addObject:controller];
+    UIImageView *view = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"earthporn"]];
+    [self.view addSubview:view];
 }
 
 @end

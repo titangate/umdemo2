@@ -8,6 +8,16 @@
 
 #import <UIKit/UIKit.h>
 
+@protocol MentionViewControllerDelegate <NSObject>
+
+- (BOOL)nextOneReady;
+- (UIViewController *)nextViewController;
+
+@end
+
 @interface MentionViewController : UIViewController <UINavigationControllerDelegate>
+
+- (void)setImage:(UIImage *)image;
+- (void)setText:(NSString *)text;
 
 @end

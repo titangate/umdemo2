@@ -8,24 +8,6 @@
 
 #import <UIKit/UIKit.h>
 
-typedef NS_ENUM(NSInteger, SOLEdge) {
-    SOLEdgeTop,
-    SOLEdgeLeft,
-    SOLEdgeBottom,
-    SOLEdgeRight,
-    SOLEdgeTopRight,
-    SOLEdgeTopLeft,
-    SOLEdgeBottomRight,
-    SOLEdgeBottomLeft
-};
-
 @interface MentionTransitionAnimator : UIPercentDrivenInteractiveTransition <UIViewControllerAnimatedTransitioning>
-
-@property (nonatomic, assign) SOLEdge edge;
-@property (nonatomic, assign, getter = isAppearing) BOOL appearing;
-
-+ (NSDictionary *)edgeDisplayNames;
-
-- (CGRect)rectOffsetFromRect:(CGRect)rect atEdge:(SOLEdge)edge;
 
 @end
