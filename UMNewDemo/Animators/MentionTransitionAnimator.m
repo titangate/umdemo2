@@ -41,6 +41,10 @@
                      completion:^(BOOL finished) {
                          BOOL completed = toView.alpha == 1;
                          [transitionContext completeTransition:completed];
+                         if (!finished) {
+                             
+                             [toView removeFromSuperview];
+                         }
                      }];
 }
 

@@ -16,6 +16,7 @@
 @property (nonatomic) UIPanGestureRecognizer *recognizer;
 @property (nonatomic) UIAttachmentBehavior *attachmentBehavior;
 @property (nonatomic) MentionTransitionAnimator *transitionAnimator;
+@property (nonatomic) UIViewController *nextVC;
 @end
 
 @implementation MentionViewController {
@@ -78,7 +79,11 @@
 }
 
 - (void)startTransition {
-    [self.navigationController popViewControllerAnimated:YES];
+    NSAssert([self.delegate nextOneReady], @"No more views in transition!");
+    if (!self.nextVC) {
+        self.nextVC = [self.delegate nextViewController];
+    }
+    [self.navigationController pushViewController:self.nextVC animated:YES];
 }
 
 - (CGRect)defaultRectForMainView {
@@ -88,6 +93,13 @@
 - (void)finishTransition:(BOOL)completed {
     if (completed) {
         [self.transitionAnimator finishInteractiveTransition];
+        self.navigationController.delegate = self.nextVC;
+        
+        UIDynamicItemBehavior *itemBehavior = [[UIDynamicItemBehavior alloc] initWithItems:[NSArray arrayWithObject:self.imageView]];
+        CGFloat dx = (self.imageView.center.x - self.view.center.x) * 10;
+        CGFloat dy = (self.imageView.center.y - self.view.center.y) * 10;
+        [itemBehavior addLinearVelocity:CGPointMake(dx, dy) forItem:self.imageView];
+        [self.animator addBehavior:itemBehavior];
     } else {
         [self.transitionAnimator cancelInteractiveTransition];
         CGRect rect = [self defaultRectForMainView];
@@ -114,6 +126,9 @@
     CGPoint location = [recognizer locationInView:self.view];
     switch (recognizer.state) {
         case UIGestureRecognizerStateBegan:
+            if (![self.delegate nextOneReady]) {
+                return;
+            }
             [self startTransition];
             if (self.attachmentBehavior == nil) {
                 // the view might be rotated. we apply a rotational matrix to calculate the correct offset.
@@ -147,7 +162,7 @@
 }
 
 - (id<UIViewControllerAnimatedTransitioning>)navigationController:(UINavigationController *)navigationController animationControllerForOperation:(UINavigationControllerOperation)operation fromViewController:(UIViewController *)fromVC toViewController:(UIViewController *)toVC {
-    if (operation == UINavigationControllerOperationPop) {
+    if (operation == UINavigationControllerOperationPush) {
         toVC.transitioningDelegate = self;
         
         // use a random transition

@@ -19,17 +19,25 @@
     MentionViewController *controller = [[MentionViewController alloc] init];
     [controller setImage:[UIImage imageNamed:@"earthporn"]];
     [controller setText:[NSString stringWithFormat:@"This is the %dth mention", index]];
+    controller.delegate = self;
+    [self.viewControllers addObject:controller];
     return controller;
 }
 
 - (void)viewDidLoad {
     self.viewControllers = [[NSMutableArray alloc] init];
     MentionViewController *controller = [self createNewMentionViewControllerAtIndex:0];
-    self.navigationController.delegate = controller;
     [self.navigationController pushViewController:controller animated:YES];
-    [self.viewControllers addObject:controller];
-    UIImageView *view = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"earthporn"]];
-    [self.view addSubview:view];
+    self.navigationController.delegate = controller;
+}
+
+- (BOOL)nextOneReady {
+    return YES;
+}
+
+- (UIViewController *)nextViewController {
+    NSLog(@"new vc %d", [self.viewControllers count]);
+    return [self createNewMentionViewControllerAtIndex:[self.viewControllers count]];
 }
 
 @end

@@ -17,6 +17,7 @@
 
 @interface MentionViewController : UIViewController <UINavigationControllerDelegate>
 
+@property (nonatomic, weak) id<MentionViewControllerDelegate> delegate;
 - (void)setImage:(UIImage *)image;
 - (void)setText:(NSString *)text;
 
